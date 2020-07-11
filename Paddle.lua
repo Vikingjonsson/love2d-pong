@@ -1,5 +1,13 @@
-Paddle = Class {}
+local Class = require 'lib.hump.class'
 
+---@class Paddle
+local Paddle = Class {}
+
+---@param x number
+---@param y number
+---@param width number
+---@param height number
+---@param controller table<string, string>
 function Paddle:init(x, y, width, height, controller)
   self.x = x
   self.y = y
@@ -10,6 +18,7 @@ function Paddle:init(x, y, width, height, controller)
   self.down = controller.down
 end
 
+---@param dt number
 function Paddle:update(dt)
   self.y = love.keyboard.isDown(self.up) and self.y - self.speed * dt or self.y
   self.y = love.keyboard.isDown(self.down) and self.y + self.speed * dt or self.y
@@ -22,3 +31,5 @@ end
 function Paddle:draw()
   love.graphics.rectangle('fill', self.x, self.y, self.width, self.height)
 end
+
+return Paddle

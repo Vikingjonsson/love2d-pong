@@ -3,8 +3,8 @@ if os.getenv('LOCAL_LUA_DEBUGGER_VSCODE') == '1' then
 end
 
 local push = require 'lib.push.push'
-local Ball = require 'Ball'
-local Paddle = require 'Paddle'
+local Ball = require 'src.Ball'
+local Paddle = require 'src.Paddle'
 
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
@@ -39,13 +39,13 @@ function love.load()
   math.randomseed(os.time())
   love.graphics.setDefaultFilter('nearest', 'nearest')
   love.window.setTitle('Pong!')
-  small_font = love.graphics.newFont('font/8bit16.ttf', 8)
-  score_font = love.graphics.newFont('font/8bit16.ttf', 32)
+  small_font = love.graphics.newFont('assets/font/8bit16.ttf', 8)
+  score_font = love.graphics.newFont('assets/font/8bit16.ttf', 32)
 
   sounds = {
-    paddle_hit = love.audio.newSource('sounds/paddle_hit.wav', 'static'),
-    score = love.audio.newSource('sounds/score.wav', 'static'),
-    wall_hit = love.audio.newSource('sounds/wall_hit.wav', 'static')
+    paddle_hit = love.audio.newSource('assets/sounds/paddle_hit.wav', 'static'),
+    score = love.audio.newSource('assets/sounds/score.wav', 'static'),
+    wall_hit = love.audio.newSource('assets/sounds/wall_hit.wav', 'static')
   }
 
   ---@type Ball

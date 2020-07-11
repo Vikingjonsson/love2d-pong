@@ -19,7 +19,7 @@ Press **O** to move up and **L** to move down.
 ## Quickstart
 
 ```shell
-cd pong && love .
+love .
 ```
 
 ## Requirements

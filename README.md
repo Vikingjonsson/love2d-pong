@@ -3,7 +3,7 @@
 Pong created with Löve2d and EmmyLua.
 This is a local multiplayer game.
 
-## Game Controlls
+## Game Controls
 
 Press **Enter** to serve.
 Press **Escape** to quit.

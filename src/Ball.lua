@@ -1,4 +1,5 @@
 local Class = require 'lib.hump.class'
+local constants = require 'src.constants'
 
 --region Ball
 ---@class Ball
@@ -32,9 +33,9 @@ function Ball:update(dt)
   self.x = self.x + self.dx * dt
   self.y = self.y + self.dy * dt
 
-  local touch_bottom = self.y + self.height > VIRTUAL_HEIGHT
+  local touch_bottom = self.y + self.height > constants.VIRTUAL_HEIGHT
   self.dy = touch_bottom and -self.dy or self.dy
-  self.y = touch_bottom and VIRTUAL_HEIGHT - self.height or self.y
+  self.y = touch_bottom and constants.VIRTUAL_HEIGHT - self.height or self.y
 
   local touched_top = self.y < 0
   self.dy = touched_top and -self.dy or self.dy
@@ -51,8 +52,8 @@ function Ball:draw()
 end
 
 function Ball:reset()
-  self.x = VIRTUAL_WIDTH / 2 - 2
-  self.y = VIRTUAL_HEIGHT / 2 - 2
+  self.x = constants.VIRTUAL_WIDTH / 2 - 2
+  self.y = constants.VIRTUAL_HEIGHT / 2 - 2
   self.dx = 0
   self.dy = 0
 end

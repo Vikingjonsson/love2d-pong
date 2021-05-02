@@ -5,19 +5,25 @@ end
 local push = require 'lib.push.push'
 local Ball = require 'src.Ball'
 local Paddle = require 'src.Paddle'
-
-WINDOW_WIDTH = 1280
-WINDOW_HEIGHT = 720
-VIRTUAL_WIDTH = 320
-VIRTUAL_HEIGHT = 180
-MAX_SCORE = 10
+local constants = require 'src.constants'
 
 local function rgba(red, green, blue, alpha)
   return red / 255, green / 255, blue / 255, alpha
 end
 
-local player1, player2, ball
+
+
+local STATES = {
+  PLAY = 'play',
+  START = 'start',
+  SERVE = 'serve',
+  DONE = 'done'
+}
+local MAX_SCORE = 10
 local small_font, score_font
+local game_state = STATES.START
+local serving_player = 1
+local player1, player2, ball
 local players = {}
 local sounds = {}
 local scores = {
@@ -25,21 +31,11 @@ local scores = {
   p2 = 0
 }
 
-STATES = {
-  PLAY = 'play',
-  START = 'start',
-  SERVE = 'serve',
-  DONE = 'done'
-}
-
-GAME_STATE = STATES.START
-
-local serving_player = 1
-
 function love.load()
   math.randomseed(os.time())
   love.graphics.setDefaultFilter('nearest', 'nearest')
   love.window.setTitle('Pong!')
+
   small_font = love.graphics.newFont('assets/font/8bit16.ttf', 8)
   score_font = love.graphics.newFont('assets/font/8bit16.ttf', 32)
 
@@ -50,19 +46,19 @@ function love.load()
   }
 
   ---@type Ball
-  ball = Ball(VIRTUAL_WIDTH / 2 - 2, VIRTUAL_HEIGHT / 2 - 2, 4, 4)
+  ball = Ball(constants.VIRTUAL_WIDTH / 2 - 2, constants.VIRTUAL_HEIGHT / 2 - 2, 4, 4)
   ---@type Paddle
   player1 = Paddle(10, 30, 5, 20, {up = 'w', down = 's'})
   ---@type Paddle
-  player2 = Paddle(VIRTUAL_WIDTH - 10, VIRTUAL_HEIGHT - 50, 5, 20, {up = 'o', down = 'l'})
+  player2 = Paddle(constants.VIRTUAL_WIDTH - 10, constants.VIRTUAL_HEIGHT - 50, 5, 20, {up = 'o', down = 'l'})
   ---@type Paddle[]
   players = {player1, player2}
 
   push:setupScreen(
-    VIRTUAL_WIDTH,
-    VIRTUAL_HEIGHT,
-    WINDOW_WIDTH,
-    WINDOW_HEIGHT,
+    constants.VIRTUAL_WIDTH,
+    constants.VIRTUAL_HEIGHT,
+    constants.WINDOW_WIDTH,
+    constants.WINDOW_HEIGHT,
     {
       fullscreen = false,
       resizable = false,
@@ -73,41 +69,27 @@ function love.load()
 end
 
 function love.update(dt)
-  if GAME_STATE == STATES.SERVE then
+  if game_state == STATES.SERVE then
     ball:reset()
-
     ball.dy = math.random(-50, 50)
-    if serving_player == 1 then
-      ball.dx = math.random(140, 200)
-    else
-      ball.dx = -math.random(140, 200)
-    end
+    local HORIZONTAL_SPEED = math.random(140, 200)
+    ball.dx = serving_player == 1 and HORIZONTAL_SPEED or -HORIZONTAL_SPEED
   end
 
   player1:update(dt)
   player2:update(dt)
 
-  if GAME_STATE == STATES.PLAY then
+  if game_state == STATES.PLAY then
     ball:update(dt)
 
-    if ball.x > VIRTUAL_WIDTH then
+    if ball.x > constants.VIRTUAL_WIDTH then
       scores.p1 = scores.p1 + 1
-
-      if scores.p1 == MAX_SCORE then
-        GAME_STATE = STATES.DONE
-      else
-        GAME_STATE = STATES.SERVE
-      end
+      game_state = scores.p1 == MAX_SCORE and STATES.DONE or STATES.SERVE
     end
 
     if ball.x + ball.width < 0 then
       scores.p2 = scores.p2 + 1
-
-      if scores.p2 == 10 then
-        GAME_STATE = STATES.DONE
-      else
-        GAME_STATE = STATES.SERVE
-      end
+      game_state = scores.p2 == MAX_SCORE and STATES.DONE or STATES.SERVE
     end
 
     for index, player in ipairs(players) do
@@ -131,30 +113,31 @@ function love.draw()
 
   -- HUD
   love.graphics.setFont(score_font)
-  love.graphics.print(tostring(scores.p1), VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 3)
-  love.graphics.print(tostring(scores.p2), VIRTUAL_WIDTH / 2 + 30, VIRTUAL_HEIGHT / 3)
-
+  love.graphics.print(tostring(scores.p1), constants.VIRTUAL_WIDTH / 2 - 50, constants.VIRTUAL_HEIGHT / 3)
+  love.graphics.print(tostring(scores.p2), constants.VIRTUAL_WIDTH / 2 + 30, constants.VIRTUAL_HEIGHT / 3)
   love.graphics.setFont(small_font)
-  if GAME_STATE == STATES.SERVE then
+
+  if game_state == STATES.SERVE then
     love.graphics.printf(
-      'Player ' .. tostring(serving_player) .. ' ' .. GAME_STATE,
+      'Player ' .. tostring(serving_player) .. ' ' .. game_state,
       0,
       20,
-      VIRTUAL_WIDTH,
+      constants.VIRTUAL_WIDTH,
       'center'
     )
   end
 
-  if GAME_STATE == STATES.DONE then
+  if game_state == STATES.DONE then
     local winning_message = scores.p1 == MAX_SCORE and 'Player 1' or 'Player 2'
-    love.graphics.printf(winning_message .. 'Wins', 0, 20, VIRTUAL_WIDTH, 'center')
-  else
-    love.graphics.printf(GAME_STATE, 0, 20, VIRTUAL_WIDTH, 'center')
+    love.graphics.printf(winning_message .. 'Wins', 0, 20, constants.VIRTUAL_WIDTH, 'center')
+  end
+
+  if game_state ~= STATES.DONE and game_state ~= STATES.SERVE then
+    love.graphics.printf(game_state, 0, 20, constants.VIRTUAL_WIDTH, 'center')
   end
 
   push:finish()
 end
-
 
 function love.keypressed(key)
   if key == 'escape' then
@@ -162,18 +145,19 @@ function love.keypressed(key)
   end
 
   local KEY_RETURN = 'return'
-  if key == KEY_RETURN and GAME_STATE == STATES.START then
-    GAME_STATE = STATES.SERVE
-  end
-
-  if key == KEY_RETURN and GAME_STATE == STATES.SERVE then
-    serving_player = serving_player == 1 and 2 or 1
-    GAME_STATE = STATES.PLAY
-  end
-
-  if key == KEY_RETURN and GAME_STATE == STATES.DONE then
+  if key == KEY_RETURN and game_state == STATES.DONE then
     scores.p1 = 0
     scores.p2 = 0
-    GAME_STATE = STATES.SERVE
+    game_state = STATES.SERVE
   end
+
+  if key == KEY_RETURN and game_state == STATES.SERVE then
+    serving_player = serving_player == 1 and 2 or 1
+    game_state = STATES.PLAY
+  end
+
+  if key == KEY_RETURN and game_state == STATES.START then
+    game_state = STATES.SERVE
+  end
+
 end

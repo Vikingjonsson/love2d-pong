@@ -1,4 +1,5 @@
 local Class = require 'lib.hump.class'
+local constants = require 'src.constants'
 
 ---@class Paddle
 local Paddle = Class {}
@@ -24,7 +25,7 @@ function Paddle:update(dt)
   self.y = love.keyboard.isDown(self.down) and self.y + self.speed * dt or self.y
 
   -- keep paddle in screen
-  self.y = self.y + self.height > VIRTUAL_HEIGHT and VIRTUAL_HEIGHT - self.height or self.y
+  self.y = self.y + self.height > constants.VIRTUAL_HEIGHT and constants.VIRTUAL_HEIGHT - self.height or self.y
   self.y = self.y > 0 and self.y or 0
 end
 

@@ -1,7 +1,6 @@
 # Pong 🎾
 
-Pong created with Löve2d and EmmyLua.
-This is a local multiplayer game.
+This is a local multiplayer version of Pong, created with Löve2d.
 
 ## Game Controls
 

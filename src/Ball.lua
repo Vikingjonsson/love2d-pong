@@ -6,6 +6,7 @@ local Ball = Class {}
 
 ---@param a table<string, number>
 ---@param b table<string, number>
+---@return boolean result
 local function check_collision_AABB(a, b)
   if a.x < b.x + b.width and a.y < b.y + b.height and b.x < a.x + a.width and b.y < a.y + a.height then
     return true

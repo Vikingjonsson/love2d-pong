@@ -1,15 +1,15 @@
-if os.getenv("LOCAL_LUA_DEBUGGER_VSCODE") == "1" then
-  require("lldebugger").start()
+if os.getenv('LOCAL_LUA_DEBUGGER_VSCODE') == '1' then
+  require('lldebugger').start()
 end
 
-local push = require "lib.push.push"
-local Ball = require "src.Ball"
-local Paddle = require "src.Paddle"
+local push = require 'lib.push.push'
+local Ball = require 'src.Ball'
+local Paddle = require 'src.Paddle'
 
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
-VIRTUAL_WIDTH = 432
-VIRTUAL_HEIGHT = 243
+VIRTUAL_WIDTH = 320
+VIRTUAL_HEIGHT = 180
 MAX_SCORE = 10
 
 local function rgba(red, green, blue, alpha)
@@ -26,10 +26,10 @@ local scores = {
 }
 
 STATES = {
-  PLAY = "play",
-  START = "start",
-  SERVE = "serve",
-  DONE = "done"
+  PLAY = 'play',
+  START = 'start',
+  SERVE = 'serve',
+  DONE = 'done'
 }
 
 GAME_STATE = STATES.START
@@ -38,23 +38,23 @@ local serving_player = 1
 
 function love.load()
   math.randomseed(os.time())
-  love.graphics.setDefaultFilter("nearest", "nearest")
-  love.window.setTitle("Pong!")
-  small_font = love.graphics.newFont("assets/font/8bit16.ttf", 8)
-  score_font = love.graphics.newFont("assets/font/8bit16.ttf", 32)
+  love.graphics.setDefaultFilter('nearest', 'nearest')
+  love.window.setTitle('Pong!')
+  small_font = love.graphics.newFont('assets/font/8bit16.ttf', 8)
+  score_font = love.graphics.newFont('assets/font/8bit16.ttf', 32)
 
   sounds = {
-    paddle_hit = love.audio.newSource("assets/sounds/paddle_hit.wav", "static"),
-    score = love.audio.newSource("assets/sounds/score.wav", "static"),
-    wall_hit = love.audio.newSource("assets/sounds/wall_hit.wav", "static")
+    paddle_hit = love.audio.newSource('assets/sounds/paddle_hit.wav', 'static'),
+    score = love.audio.newSource('assets/sounds/score.wav', 'static'),
+    wall_hit = love.audio.newSource('assets/sounds/wall_hit.wav', 'static')
   }
 
   ---@type Ball
   ball = Ball(VIRTUAL_WIDTH / 2 - 2, VIRTUAL_HEIGHT / 2 - 2, 4, 4)
   ---@type Paddle
-  player1 = Paddle(10, 30, 5, 20, {up = "w", down = "s"})
+  player1 = Paddle(10, 30, 5, 20, {up = 'w', down = 's'})
   ---@type Paddle
-  player2 = Paddle(VIRTUAL_WIDTH - 10, VIRTUAL_HEIGHT - 50, 5, 20, {up = "o", down = "l"})
+  player2 = Paddle(VIRTUAL_WIDTH - 10, VIRTUAL_HEIGHT - 50, 5, 20, {up = 'o', down = 'l'})
   ---@type Paddle[]
   players = {player1, player2}
 
@@ -136,28 +136,42 @@ function love.draw()
 
   love.graphics.setFont(small_font)
   if GAME_STATE == STATES.SERVE then
-    love.graphics.printf("Player " .. tostring(serving_player) .. " " .. GAME_STATE, 0, 20, VIRTUAL_WIDTH, "center")
-  elseif GAME_STATE == STATES.DONE then
-    local winning_message = scores.p1 == MAX_SCORE and "Player 1" or "Player 2"
-    love.graphics.printf(winning_message .. "Wins", 0, 20, VIRTUAL_WIDTH, "center")
+    love.graphics.printf(
+      'Player ' .. tostring(serving_player) .. ' ' .. GAME_STATE,
+      0,
+      20,
+      VIRTUAL_WIDTH,
+      'center'
+    )
+  end
+
+  if GAME_STATE == STATES.DONE then
+    local winning_message = scores.p1 == MAX_SCORE and 'Player 1' or 'Player 2'
+    love.graphics.printf(winning_message .. 'Wins', 0, 20, VIRTUAL_WIDTH, 'center')
   else
-    love.graphics.printf(GAME_STATE, 0, 20, VIRTUAL_WIDTH, "center")
+    love.graphics.printf(GAME_STATE, 0, 20, VIRTUAL_WIDTH, 'center')
   end
 
   push:finish()
 end
 
+
 function love.keypressed(key)
-  if key == "escape" then
+  if key == 'escape' then
     love.event.quit()
   end
-  local KEY_RETURN = "return"
+
+  local KEY_RETURN = 'return'
   if key == KEY_RETURN and GAME_STATE == STATES.START then
     GAME_STATE = STATES.SERVE
-  elseif key == KEY_RETURN and GAME_STATE == STATES.SERVE then
+  end
+
+  if key == KEY_RETURN and GAME_STATE == STATES.SERVE then
     serving_player = serving_player == 1 and 2 or 1
     GAME_STATE = STATES.PLAY
-  elseif key == KEY_RETURN and GAME_STATE == STATES.DONE then
+  end
+
+  if key == KEY_RETURN and GAME_STATE == STATES.DONE then
     scores.p1 = 0
     scores.p2 = 0
     GAME_STATE = STATES.SERVE

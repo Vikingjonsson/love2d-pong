@@ -11,8 +11,6 @@ local function rgba(red, green, blue, alpha)
   return red / 255, green / 255, blue / 255, alpha
 end
 
-
-
 local STATES = {
   PLAY = 'play',
   START = 'start',
@@ -23,36 +21,36 @@ local MAX_SCORE = 10
 local small_font, score_font
 local game_state = STATES.START
 local serving_player = 1
-local player1, player2, ball
-local players = {}
 local sounds = {}
 local scores = {
   p1 = 0,
   p2 = 0
 }
 
+---@type Ball
+local ball = Ball(constants.VIRTUAL_WIDTH / 2 - 2, constants.VIRTUAL_HEIGHT / 2 - 2, 4, 4)
+---@type Paddle
+local player1 = Paddle(10, 30, 5, 20, {up = 'w', down = 's'}) ---@type Paddle
+---@type Paddle
+local player2 = Paddle(constants.VIRTUAL_WIDTH - 10, constants.VIRTUAL_HEIGHT - 50, 5, 20, {up = 'o', down = 'l'})
+---@type Paddle[]
+local players = {player1, player2}
+
+local SOUND_PATH = 'assets/sounds/'
+local FONT_PATH = 'assets/font/'
+
 function love.load()
   math.randomseed(os.time())
   love.graphics.setDefaultFilter('nearest', 'nearest')
   love.window.setTitle('Pong!')
 
-  small_font = love.graphics.newFont('assets/font/8bit16.ttf', 8)
-  score_font = love.graphics.newFont('assets/font/8bit16.ttf', 32)
-
+  small_font = love.graphics.newFont(FONT_PATH .. '8bit16.ttf', 8)
+  score_font = love.graphics.newFont(FONT_PATH .. '8bit16.ttf', 32)
   sounds = {
-    paddle_hit = love.audio.newSource('assets/sounds/paddle_hit.wav', 'static'),
-    score = love.audio.newSource('assets/sounds/score.wav', 'static'),
-    wall_hit = love.audio.newSource('assets/sounds/wall_hit.wav', 'static')
+    paddle_hit = love.audio.newSource(SOUND_PATH .. 'paddle_hit.wav', 'static'),
+    score = love.audio.newSource(SOUND_PATH .. 'score.wav', 'static'),
+    wall_hit = love.audio.newSource(SOUND_PATH .. 'wall_hit.wav', 'static')
   }
-
-  ---@type Ball
-  ball = Ball(constants.VIRTUAL_WIDTH / 2 - 2, constants.VIRTUAL_HEIGHT / 2 - 2, 4, 4)
-  ---@type Paddle
-  player1 = Paddle(10, 30, 5, 20, {up = 'w', down = 's'})
-  ---@type Paddle
-  player2 = Paddle(constants.VIRTUAL_WIDTH - 10, constants.VIRTUAL_HEIGHT - 50, 5, 20, {up = 'o', down = 'l'})
-  ---@type Paddle[]
-  players = {player1, player2}
 
   push:setupScreen(
     constants.VIRTUAL_WIDTH,
@@ -159,5 +157,4 @@ function love.keypressed(key)
   if key == KEY_RETURN and game_state == STATES.START then
     game_state = STATES.SERVE
   end
-
 end

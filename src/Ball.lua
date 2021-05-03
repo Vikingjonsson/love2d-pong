@@ -5,14 +5,12 @@ local constants = require 'src.constants'
 ---@class Ball
 local Ball = Class {}
 
----@param a table<string, number>
----@param b table<string, number>
----@return boolean result
+---@tparam a table<string, number> representing a rectangle
+---@tparam b table<string, number> representing a rectangle
+---@return boolean result true if collision has happened otherwise false
 local function check_collision_AABB(a, b)
-  if a.x < b.x + b.width and a.y < b.y + b.height and b.x < a.x + a.width and b.y < a.y + a.height then
-    return true
-  end
-  return false
+  local has_collision = a.x < b.x + b.width and a.y < b.y + b.height and b.x < a.x + a.width and b.y < a.y + a.height
+  return has_collision
 end
 
 ---@param x number
@@ -33,24 +31,25 @@ function Ball:update(dt)
   self.x = self.x + self.dx * dt
   self.y = self.y + self.dy * dt
 
-  local touch_bottom = self.y + self.height > constants.VIRTUAL_HEIGHT
-  self.dy = touch_bottom and -self.dy or self.dy
-  self.y = touch_bottom and constants.VIRTUAL_HEIGHT - self.height or self.y
+  local TOUCHED_TOP = self.y < 0
+  local TOUCH_BOTTOM = self.y + self.height > constants.VIRTUAL_HEIGHT
 
-  local touched_top = self.y < 0
-  self.dy = touched_top and -self.dy or self.dy
-  self.y = touched_top and 0 or self.y
+  self.dy = TOUCH_BOTTOM and -self.dy or self.dy
+  self.dy = TOUCHED_TOP and -self.dy or self.dy
 end
 
----@param collider Paddle
+---@tparam collider table<string, number> representing a rectangle
+---@return boolean result true if collision has happened otherwise false
 function Ball:on_collision(collider)
   return check_collision_AABB(self, collider)
 end
 
+---Draw ball
 function Ball:draw()
   love.graphics.rectangle('fill', self.x, self.y, self.width, self.height)
 end
 
+---Reset the ball's state
 function Ball:reset()
   self.x = constants.VIRTUAL_WIDTH / 2 - 2
   self.y = constants.VIRTUAL_HEIGHT / 2 - 2
